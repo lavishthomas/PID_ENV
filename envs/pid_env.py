@@ -79,18 +79,9 @@ class PidEnv(gym.Env):
         self.previous_error = 0
         self.current_error = 0
         # self.eq = [1, 2, 3, 4]  # x3 + 2x2 + 3x + 4
-        self.eq = [3, 4]  # 1x + 2
+        self.eq = [3, 4]  # 1x + 2        
         
-        self.action_sample = np.arange(.5, 1.5, 0.1)
-        
-        points=len(self.action_sample)
-        self.action_space = spaces.Discrete(points)
-        #self.action_space = spaces.Discrete(5)
-
-        
-        # maximum values allowed
-
-        #high = np.array([self.pv, self.sp],  dtype=np.float32)
+        self.action_space = spaces.Discrete(5)
         high = np.array([self.pv, self.sp],  dtype=np.float32)
         self.observation_space = spaces.Box(-high, high, dtype=np.float32)
 
@@ -109,9 +100,22 @@ class PidEnv(gym.Env):
         return total
 
     def step(self, action):
-
         # Chaning the mv based on action
-        self.mv = self.mv * self.action_sample[action]
+        if action == 0:
+            pass
+        elif action == 1:
+            self.mv += 1
+        elif action == 2:
+            self.mv -= 1
+        elif action == 3:
+            self.mv += 2
+        elif action == 4:
+            self.mv -= 2
+        else:
+            print('unidentified action')
+
+        # new pv value based on the equation
+        self.pv = self.eq_evaluator(self.mv)
 
         # New pv value based on the equation
         self.pv = self.eq_evaluator(self.mv)
@@ -129,7 +133,7 @@ class PidEnv(gym.Env):
         done = True
         self.state = [self.pv, self.sp]
 
-        print('action : ', action, ' value : ', self.action_sample[action])
+        print('action : ', action, ' value : ') # self.action_sample[action])
         print('mv :', self.mv, 'sp :', self.sp, 'pv :', self.pv)
         print('ce :', self.current_error, 'pe', self.previous_error)
 

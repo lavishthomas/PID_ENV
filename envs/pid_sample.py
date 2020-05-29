@@ -5,7 +5,7 @@ from gym import error, spaces, utils, logger
 from gym.utils import seeding
 
 
-class FooEnv(gym.Env):
+class PidEnv(gym.Env):
     """
     Description:
         A pole is attached by an un-actuated joint to a cart, which moves along

@@ -5,7 +5,7 @@ from gym import error, spaces, utils, logger
 from gym.utils import seeding
 
 
-class FooEnv(gym.Env):
+class PidEnv(gym.Env):
     """
     Description:
         A pole is attached by an un-actuated joint to a cart, which moves along
@@ -62,8 +62,13 @@ class FooEnv(gym.Env):
         'video.frames_per_second': 50}
 
     def __init__(self):
-        
-        self.f = open("data.csv", "w")
+        # Recording Data
+        now = datetime.now()
+        dt_string = now.strftime("%d_%m_%Y_%H_%M_%S")
+        print("date and time =", dt_string)
+        dt_string = 'data/' + dt_string + '.csv'
+        self.f = open(dt_string, "w")
+        self.f.write('mv,sp,pv,ce,pe\n')
         # PID Properties
         self.sp = 1000
         self.pv = 0
