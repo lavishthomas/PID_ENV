@@ -4,6 +4,7 @@ import numpy as np
 from gym import error, spaces, utils, logger
 from gym.utils import seeding
 
+
 a = spaces.Discrete(2)
 
 
@@ -33,8 +34,19 @@ seed = None
 np_random, seed = seeding.np_random(seed)
 state = np_random.uniform(low=-0.05, high=0.05, size=(4,))
 
+print('------------------------------')
 print(high.shape)
 
 print(high)
 print(-high)
+print('------------------------------')
 print(state)
+print('------------------------------')
+print('action_space')
+print(action_space)
+print(action_space.shape)
+print('------------------------------')
+
+print('observation_space')
+print(observation_space)
+print(observation_space.shape)
