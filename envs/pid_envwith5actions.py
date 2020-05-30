@@ -1,12 +1,10 @@
 import gym
 import math
 import numpy as np
-import requests
-from random import uniform
 from gym import error, spaces, utils, logger
 from gym.utils import seeding
 from datetime import datetime
-
+import requests
 # Base url to the Process server
 baseUrl = 'http://localhost:5000/'
 
@@ -83,13 +81,10 @@ class PidEnv(gym.Env):
         self.mv = 1
         self.previous_error = 0
         self.current_error = 0
-        self.eq = [1, 2, 3, 4]  # x3 + 2x2 + 3x + 4
-        # self.eq = [3, 5]  # 1x + 2
-        # sp changer
+        # self.eq = [1, 2, 3, 4]  # x3 + 2x2 + 3x + 4
+        self.eq = [3, 4]  # 1x + 2
 
-        self.counter = 0
-
-        self.action_space = spaces.Discrete(5)  # 3 possible actions 0,1,2
+        self.action_space = spaces.Discrete(5)
         high = np.array([self.pv, self.sp],  dtype=np.float32)
         self.observation_space = spaces.Box(-high, high, dtype=np.float32)
 
@@ -100,20 +95,11 @@ class PidEnv(gym.Env):
         self.steps_beyond_done = None
 
     def eq_evaluator_local(self, x_value):
-
-        # SP changer
-        self.counter += 1
-        if self.counter > 200:
-            self.counter = 0
-            self.sp = self.sp * uniform(0.8, 1.2)
-
         total = 0
         for index, coefficient in enumerate(reversed(self.eq)):
-            #print(index, '  ', coefficient)
+            print(index, '  ', coefficient)
             total = total + (coefficient * (x_value ** (index)))
-        data = {'sp': round(self.sp, 5),
-                'pv': round(total, 5),
-                'mv': round(self.mv, 5)}
+        data = {'sp': self.sp, 'pv': total, 'mv': self.mv}
         return data
 
     def eq_evaluator(self, x_value):
@@ -126,20 +112,17 @@ class PidEnv(gym.Env):
 
     def step(self, action):
         # Chaning the mv based on action
-        if self.mv == 0:
-            self.mv = 1.1
-        ### The rate of change is depend on the compelxity of the equation    
-        increment = (self.previous_error/self.sp) * self.mv * .05
+        increment = self.previous_error/10
         if action == 0:
             pass
         elif action == 1:
-            self.mv += increment
+            self.mv += 1
         elif action == 2:
-            self.mv -= increment
+            self.mv -= 1
         elif action == 3:
-            self.mv += increment*2
+            self.mv += 2
         elif action == 4:
-            self.mv -= increment*2
+            self.mv -= 2
         else:
             print('unidentified action')
 
@@ -152,17 +135,17 @@ class PidEnv(gym.Env):
 
         self.current_error = abs(self.sp - self.pv)
 
-        if self.current_error < self.previous_error:
-            reward = 1
-        else:
+        if self.current_error > self.previous_error:
             reward = -1
+        else:
+            reward = 1
 
         self.previous_error = self.current_error
 
         done = True
         self.state = [self.pv, self.sp]
 
-        print('action : ', action)  # self.action_sample[action])
+        print('action : ', action, ' value : ')  # self.action_sample[action])
         print('mv :', self.mv, 'sp :', self.sp, 'pv :', self.pv)
         print('ce :', self.current_error, 'pe', self.previous_error)
 
