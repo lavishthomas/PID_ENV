@@ -75,17 +75,19 @@ class PidEnv(gym.Env):
         print("date and time =", dt_string)
         dt_string = 'data/' + dt_string + '.csv'
         self.f = open(dt_string, "w")
-        self.f.write('mv,sp,pv,ce,pe\n')
+        self.f.write('cv,sp,pv,ce,pe\n')
 
         # PID Properties
+        # self.eq = [1, 2, 3, 4]  # x3 + 2x2 + 3x + 4
+        # self.eq = [3, 5]  # 1x + 2
+        self.eq = [7, 6, 5, 4, 3, 2, 5]  # 1x + 2
         self.sp = 10000
         self.pv = 0
-        self.mv = 1
+        self.cv = 1
+        self.cv_change_percent = .5
+        self.cv_change_factor = len(self.eq)
         self.previous_error = 0
         self.current_error = 0
-        self.eq = [1, 2, 3, 4]  # x3 + 2x2 + 3x + 4
-        # self.eq = [3, 5]  # 1x + 2
-        # sp changer
 
         self.counter = 0
 
@@ -113,37 +115,41 @@ class PidEnv(gym.Env):
             total = total + (coefficient * (x_value ** (index)))
         data = {'sp': round(self.sp, 5),
                 'pv': round(total, 5),
-                'mv': round(self.mv, 5)}
+                'cv': round(self.cv, 5)}
         return data
 
     def eq_evaluator(self, x_value):
-        mv = x_value
+        cv = x_value
         degree = 2
-        pvUrlString = baseUrl + 'pv?degree=' + str(degree) + '&mv=' + str(mv)
+        pvUrlString = baseUrl + 'pv?degree=' + str(degree) + '&cv=' + str(cv)
         response = requests.get(pvUrlString)
         data = response.json()
         return data
 
     def step(self, action):
-        # Chaning the mv based on action
-        if self.mv == 0:
-            self.mv = 1.1
-        ### The rate of change is depend on the compelxity of the equation    
-        increment = (self.previous_error/self.sp) * self.mv * .05
+        # Changing the cv based on action
+        if self.cv == 0:
+            self.cv = 1.1
+        # The rate of change is depend on the compelxity of the equation
+        increment = (self.previous_error/self.sp) * self.cv * \
+            (self.cv_change_percent ** self.cv_change_factor)
+        print('increment : ', increment, 'change : ',
+              self.cv_change_percent, ' : ',  self.cv_change_factor)
+        increment = round(increment, 5)
         if action == 0:
             pass
         elif action == 1:
-            self.mv += increment
+            self.cv += increment
         elif action == 2:
-            self.mv -= increment
+            self.cv -= increment
         elif action == 3:
-            self.mv += increment*2
+            self.cv += increment*2
         elif action == 4:
-            self.mv -= increment*2
+            self.cv -= increment*2
         else:
             print('unidentified action')
 
-        new_values = self.eq_evaluator_local(self.mv)
+        new_values = self.eq_evaluator_local(self.cv)
         # new sp value based on the equation
         self.sp = new_values['sp']
 
@@ -163,10 +169,10 @@ class PidEnv(gym.Env):
         self.state = [self.pv, self.sp]
 
         print('action : ', action)  # self.action_sample[action])
-        print('mv :', self.mv, 'sp :', self.sp, 'pv :', self.pv)
+        print('cv :', self.cv, 'sp :', self.sp, 'pv :', self.pv)
         print('ce :', self.current_error, 'pe', self.previous_error)
 
-        data = str(self.mv) + ',' + str(self.sp) + ',' + str(self.pv) + ',' + \
+        data = str(self.cv) + ',' + str(self.sp) + ',' + str(self.pv) + ',' + \
             str(self.current_error) + ',' + str(self.previous_error) + '\n'
 
         print(data)
