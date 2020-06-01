@@ -14,10 +14,7 @@ import tensorflow as tf
 tf.compat.v1.disable_eager_execution()
 
 ENV_NAME = 'pid_env:pid-v0'
-#ENV_NAME = 'classic_control:CartPole-v0'
-#ENV_NAME = 'gym-soccer:Soccer-v0'
-#ENV_NAME = 'foo-v0'
-#ENV_NAME = 'Soccer-v0'
+
 
 # Get the environment and extract the number of actions.
 env = gym.make(ENV_NAME)
@@ -52,10 +49,15 @@ dqn.compile(Adam(lr=1e-3), metrics=['mae'])
 # Okay, now it's time to learn something! We visualize the training here for show, but this
 # slows down training quite a lot. You can always safely abort the training prematurely using
 # Ctrl + C.
-dqn.fit(env, nb_steps=5000, visualize=False, verbose=2)
+dqn.fit(env, nb_steps=2000, visualize=False, verbose=2)
 
 # After training is done, we save the final weights.
 #dqn.save_weights('dqn_{}_weights.h5f'.format(ENV_NAME), overwrite=True)
 
+# Get the environment and extract the number of actions.
+#test_env = gym.make(ENV_NAME)
+#np.random.seed(250)
+#env.seed(250)
+
 # Finally, evaluate our algorithm for 5 episodes.
-dqn.test(env, nb_episodes=5, visualize=False)
+#dqn.test(test_env, nb_episodes=10, visualize=False)

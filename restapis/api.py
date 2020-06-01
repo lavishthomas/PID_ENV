@@ -11,7 +11,6 @@ with open('config.json', 'r') as config:
 sp = int(polynomials['sp'])
 print('sp: ', sp)
 
-
 def eq_evaluator(x_value, degree):
     x_value = float(x_value)
     # Keys stored in json are of string format
@@ -35,10 +34,10 @@ def home():
 
 @ app.route('/pv', methods=['GET'])
 def pv():
-    mv = request.args['mv']
+    cv = request.args['cv']
     degree = request.args['degree']
-    pv = eq_evaluator(mv, degree)
-    data = {"sp": sp, "pv": pv, "mv": mv}
+    pv = eq_evaluator(cv, degree)
+    data = {"sp": sp, "pv": pv, "cv": cv}
     return json.dumps(data)
 
 # Modify the sp value

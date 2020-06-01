@@ -14,23 +14,17 @@ baseUrl = 'http://localhost:5000/'
 class PidEnv(gym.Env):
     """
     Description:
-        A pole is attached by an un-actuated joint to a cart, which moves along
-        a frictionless track. The pendulum starts upright, and the goal is to
-        prevent it from falling over by increasing and reducing the cart's
-        velocity.
+        A PID environment
 
     Source:
-        This environment corresponds to the version of the cart-pole problem
-        described by Barto, Sutton, and Anderson
+        This is based on PID requirements 
 
     Observation:
-        Type: Box(4)
-        Num	Observation               Min             Max
-        0	Cart Position             -4.8            4.8
-        1	Cart Velocity             -Inf            Inf
-        2	Pole Angle                -24 deg         24 deg
-        3	Pole Velocity At Tip      -Inf            Inf
-
+        Type: Box(2)
+        Num	Observation             Min          Max
+        0	pv_low                  0            Inf
+        1	pv_high                 0            Inf
+        
     Actions:
         Type: Discrete(2)
         Num	Action
@@ -39,7 +33,6 @@ class PidEnv(gym.Env):
         2   increase
         3   decrese-high
         4   increase-high
-
 
         Note: The amount the velocity that is reduced or increased is not
         fixed; it depends on the angle the pole is pointing. This is because
@@ -51,7 +44,7 @@ class PidEnv(gym.Env):
         If the error is higher than previous step -ve reward
 
     Starting State:
-        Starting state sv 100, pv = 0
+        Starting state sv 1000, pv = 0
 
     Episode Termination:
         Pole Angle is more than 12 degrees.
@@ -101,7 +94,7 @@ class PidEnv(gym.Env):
 
         self.steps_beyond_done = None
 
-    def eq_evaluator_local(self, x_value):
+    def eq_evaluator_local(self, x_value ):
 
         # SP changer
         self.counter += 1
