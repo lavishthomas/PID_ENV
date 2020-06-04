@@ -13,7 +13,7 @@ import tensorflow as tf
 
 tf.compat.v1.disable_eager_execution()
 
-ENV_NAME = 'pid_env:pid-v0'
+ENV_NAME = 'drl_envs:dqn-pid-v0'
 
 
 # Get the environment and extract the number of actions.
@@ -36,20 +36,19 @@ model.add(Dense(nb_actions))
 model.add(Activation('linear'))
 print(model.summary())
 
-
 # Finally, we configure and compile our agent. You can use every built-in Keras optimizer and
 # even the metrics!
 memory = SequentialMemory(limit=50, window_length=1)
 policy = BoltzmannQPolicy()
 dqn = DQNAgent(model=model, nb_actions=nb_actions, memory=memory,
-               nb_steps_warmup=20, target_model_update=1e-2, policy=policy)
+               nb_steps_warmup=100, target_model_update=1e-2, policy=policy)
 Adam._name = 'hey'
 dqn.compile(Adam(lr=1e-3), metrics=['mae'])
 
 # Okay, now it's time to learn something! We visualize the training here for show, but this
 # slows down training quite a lot. You can always safely abort the training prematurely using
 # Ctrl + C.
-dqn.fit(env, nb_steps=2000, visualize=False, verbose=2)
+dqn.fit(env, nb_steps=20000, visualize=False, verbose=2)
 
 # After training is done, we save the final weights.
 #dqn.save_weights('dqn_{}_weights.h5f'.format(ENV_NAME), overwrite=True)

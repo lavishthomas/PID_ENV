@@ -13,7 +13,7 @@ from process.process import Process
 baseUrl = 'http://localhost:5000/'
 
 
-class PidEnv(gym.Env):
+class DQNPidEnv(gym.Env):
     """
     Description:
         A PID environment
@@ -62,7 +62,7 @@ class PidEnv(gym.Env):
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 50}
 
-    def __init__(self):        
+    def __init__(self):
 
         ######################################
         # Intializing Process
@@ -107,35 +107,40 @@ class PidEnv(gym.Env):
         increment = (self.previous_error/self.process.sp) * self.process.cv * \
             (self.process.cv_change_percent ** self.process.cv_change_factor)
         increment = round(increment, 5)
-        # print('increment : ', increment, 'change : ', self.process.cv_change_percent, ' : ',  self.process.cv_change_factor)
-        
-        ### Changing the cv based on action chose by the agent
+        print('increment : ', increment, 'change : ',
+              self.process.cv_change_percent, ' : ',  self.process.cv_change_factor)
+
+        # Changing the cv based on action chose by the agent
         if action == 0:
             pass
         elif action == 1:
             self.process.cv += increment
+            print('increment action')
         elif action == 2:
             self.process.cv -= increment
+            print('decrement action')
         elif action == 3:
             self.process.cv += increment*2
+            print('increment high action')
         elif action == 4:
+
             self.process.cv -= increment*2
         else:
             print('unidentified action')
 
-        ### New PV is calculated by the process
+        # New PV is calculated by the process
         new_values = self.process.eq_evaluator(self.process.cv)
 
-        ### New sp value based on the equation
+        # New sp value based on the equation
         self.process.sp = new_values['sp']
 
-        ### New pv value based on the equation
+        # New pv value based on the equation
         self.process.pv = new_values['pv']
 
-        ### Calculating error
+        # Calculating error
         self.current_error = abs(self.process.sp - self.process.pv)
 
-        ### Reward calculator
+        # Reward calculator
         if self.current_error < self.previous_error:
             reward = 1
         else:
@@ -143,15 +148,24 @@ class PidEnv(gym.Env):
 
         self.previous_error = self.current_error
 
+        ### Episode ends when 
+        ### the pv is almost equal to sp.
+        ### pv goes -ve 
+        ### pv goes double the sp
+        if (self.current_error < 0.01 * self.process.sp) or (self.process.pv < 0) or (self.process.pv > (2.0 * self.process.sp)):
+            done = True
+        else:
+            done = False
         done = True
         self.state = [self.process.pv, self.process.sp]
 
         ######################################
         # Recording Data
-        ######################################        
+        ######################################
         print('action : ', action)  # self.action_sample[action])
-        print('cv :', self.process.cv, 'sp :', self.process.sp, 'pv :', self.process.pv)
-        print('ce :', self.current_error, 'pe', self.previous_error)
+        print('cv : ', self.process.cv, 'sp : ',
+              self.process.sp, 'pv :', self.process.pv)
+        print('ce : ', self.current_error, 'pe : ', self.previous_error)
 
         ######################################
 
