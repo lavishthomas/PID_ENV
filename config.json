@@ -1,14 +1,14 @@
 {
     "sp": "10000",
-    "degree": 2,
+    "degree": 1,
     "cv": 1,
     "pv": 0,
-    "sp_change_frequency": 300,
-    "1": [
+    "sp_change_frequency": 1000,
+    "1": [ 
         8,
         9
     ],
-    "2": [
+    "2": [ 
         7,
         8,
         9

@@ -10,7 +10,7 @@ from rl.memory import SequentialMemory
 from rl.random import OrnsteinUhlenbeckProcess
 
 
-ENV_NAME = 'drl_envs:ddpg-pid-v0'
+ENV_NAME = 'drl_envs:continuous-pid-v0'
 
 # Get the environment and extract the number of actions.
 env = gym.make(ENV_NAME)

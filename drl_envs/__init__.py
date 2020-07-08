@@ -1,2 +1,2 @@
-from pid_env.drl_envs.dqn_pid_env import DQNPidEnv
-from pid_env.drl_envs.ddpg_pid_env import DDPGPidEnv
+from pid_env.drl_envs.discrete import DiscreteProcess
+from pid_env.drl_envs.continuous import ContinuousProcess

@@ -13,7 +13,7 @@ from process.process import Process
 baseUrl = 'http://localhost:5000/'
 
 
-class DDPGPidEnv(gym.Env):
+class NAFPidEnv(gym.Env):
     """
     Description:
         A PID environment
@@ -77,7 +77,7 @@ class DDPGPidEnv(gym.Env):
             low=0,
             high=1,
             shape=(1,),
-            dtype=np.int8
+            dtype=np.float32
         )
         self.observation_space = spaces.Box(
             low=-high,
@@ -113,12 +113,13 @@ class DDPGPidEnv(gym.Env):
         # Changing the cv based on action
         if self.process.cv == 0:
             self.process.cv = 1.1
-        # The rate of change is depend on the compelxity of the equation        
-        increment = action[0] * (self.process.cv_change_percent ** self.process.degree)
-        print('increment : ', increment)
+        # The rate of change is depend on the compelxity of the equation 
+        increment = action[0]
+
+        increment = round(increment, 5)
 
         # Changing the cv based on action chose by the agent
-        self.process.cv += increment
+        self.process.cv += (action[0]/100) * self.process.cv
 
         # New PV is calculated by the process
         new_values = self.process.eq_evaluator(self.process.cv)
@@ -134,9 +135,9 @@ class DDPGPidEnv(gym.Env):
 
         # Reward calculator
         if self.current_error < self.previous_error:
-            reward = 1
+            reward = 1 * self.current_error
         else:
-            reward = -1
+            reward = -1 * self.current_error
 
         self.previous_error = self.current_error
 
@@ -148,11 +149,11 @@ class DDPGPidEnv(gym.Env):
             done = True
         else:
             done = False
-        done = True
+        #done = True
         self.state = [self.process.pv, self.process.sp]
 
         ######################################
-        # Recording Data
+        # Printing Data
         ######################################
         print('action : ', action)  # self.action_sample[action])
         print('cv : ', self.process.cv, 'sp : ',

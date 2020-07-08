@@ -13,7 +13,7 @@ import tensorflow as tf
 
 tf.compat.v1.disable_eager_execution()
 
-ENV_NAME = 'drl_envs:dqn-pid-v0'
+ENV_NAME = 'drl_envs:discrete-pid-v0'
 
 
 # Get the environment and extract the number of actions.

@@ -50,7 +50,7 @@ class Process():
         self.cv_change_percent = .05
         # The change has to be exponential proportional to the degree to avoid the drastic change in PV while changing CV
 
-        # self.cv_change_factor = len(self.polynomials[str(self.degree)])
+        self.cv_change_factor = self.degree
 
     ######################################
     # To get modify the value of sp in run time and write to the file
