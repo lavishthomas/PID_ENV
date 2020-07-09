@@ -45,3 +45,7 @@ This library introduces to new environments to the OpenAI gym
 ### DRL agents
 
 This library tests three agents provided by the keras-rl library to run optimization problem for PID controller.
+
+1) DQN
+2) DDPG
+3) NAF
