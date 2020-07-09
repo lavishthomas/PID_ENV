@@ -13,6 +13,7 @@ The Motivation behind this research is to demonstrate the implementation of AI t
 <li>Simple-PID implmentation</li>
 <li>Data Plot</li>
 <ol>
+------------
 
 ### Pre requiste
 
@@ -27,6 +28,7 @@ https://github.com/keras-rl/keras-rl
 checkout the library to 
 "C:\Users\lavis\AppData\Local\Programs\Python\Python38\Lib\site-packages\"
 navigate to the folder location and install using pip
+
 pip install -e .
 
 ### Process library
