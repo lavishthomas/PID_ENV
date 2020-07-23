@@ -27,7 +27,7 @@ class DiscreteProcess(gym.Env):
         1	pv_high                 0            Inf
 
     Actions:
-        Type: Discrete(2)
+        Type: Discrete(5)
         Num	Action
         0	no change
         1	decrease

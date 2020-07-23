@@ -11,10 +11,9 @@ from rl.memory import SequentialMemory
 
 import tensorflow as tf
 
-tf.compat.v1.disable_eager_execution()
+#tf.compat.v1.disable_eager_execution()
 
 ENV_NAME = 'drl_envs:discrete-pid-v0'
-
 
 # Get the environment and extract the number of actions.
 env = gym.make(ENV_NAME)
