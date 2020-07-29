@@ -28,13 +28,7 @@ class ContinuousProcess(gym.Env):
         1	pv_high                 0            Inf
 
     Actions:
-        Type: Discrete(2)
-        Num	Action
-        0	no change
-        1	decrease
-        2   increase
-        3   decrese-high
-        4   increase-high
+        
 
         Note: The amount the velocity that is reduced or increased is not
         fixed; it depends on the angle the pole is pointing. This is because
@@ -49,13 +43,7 @@ class ContinuousProcess(gym.Env):
         Starting state sv 1000, pv = 0
 
     Episode Termination:
-        Pole Angle is more than 12 degrees.
-        Cart Position is more than 2.4 (center of the cart reaches the edge of
-        the display).
-        Episode length is greater than 200.
-        Solved Requirements:
-        Considered solved when the average reward is greater than or equal to
-        195.0 over 100 consecutive trials.
+        
     """
 
     metadata = {
@@ -71,6 +59,15 @@ class ContinuousProcess(gym.Env):
 
         ######################################
 
+        self.seed()
+        self.viewer = None
+        self.state = None
+        self.steps_beyond_done = None
+        ######################################
+        self.previous_error = 0
+        self.current_error = 0
+
+        ######################################
         high = np.array([self.process.pv, self.process.sp],  dtype=np.float32)
 
         self.action_space = spaces.Box(
@@ -85,15 +82,7 @@ class ContinuousProcess(gym.Env):
             dtype=np.float32
         )
 
-        ######################################
-        self.seed()
-        self.viewer = None
-        self.state = None
-
-        self.steps_beyond_done = None
-        ######################################
-        self.previous_error = 0
-        self.current_error = 0
+        
 
     ######################################
     # To get data via API's

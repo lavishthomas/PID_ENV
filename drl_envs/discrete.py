@@ -53,16 +53,9 @@ class DiscreteProcess(gym.Env):
     def __init__(self):
 
         ######################################
-        # Intializing Process
+        # Initializing Process
         ######################################
         self.process = Process()
-
-        ######################################
-
-        self.action_space = spaces.Discrete(5)  # 5 possible actions 0 to 4
-        high = np.array([self.process.pv, self.process.sp],  dtype=np.float32)
-        self.observation_space = spaces.Box(-high, high, dtype=np.float32)
-
         ######################################
         self.seed()
         self.viewer = None
@@ -72,6 +65,12 @@ class DiscreteProcess(gym.Env):
         ######################################
         self.previous_error = 0
         self.current_error = 0
+
+        ######################################
+ 
+        self.action_space = spaces.Discrete(5)  # 5 possible actions 0 to 4
+        high = np.array([self.process.pv, self.process.sp],  dtype=np.float32)
+        self.observation_space = spaces.Box(-high, high, dtype=np.float32)        
 
     ######################################
     # To get data via API's
