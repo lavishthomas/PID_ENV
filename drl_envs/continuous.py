@@ -80,9 +80,7 @@ class ContinuousProcess(gym.Env):
             low=-high,
             high=high,
             dtype=np.float32
-        )
-
-        
+        )        
 
     ######################################
     # To get data via API's

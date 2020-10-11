@@ -90,7 +90,7 @@ class DiscreteProcess(gym.Env):
         # Changing the cv based on action
         if self.process.cv == 0:
             self.process.cv = 1.1
-        # The rate of change is depend on the compelxity of the equation
+        # The rate of change is depend on the complexity of the equation
         increment = (self.previous_error/self.process.sp) * self.process.cv * \
             (self.process.cv_change_percent ** self.process.cv_change_factor)
         increment = round(increment, 5)
@@ -110,7 +110,6 @@ class DiscreteProcess(gym.Env):
             self.process.cv += increment*2
             print('increment high action')
         elif action == 4:
-
             self.process.cv -= increment*2
         else:
             print('unidentified action')
