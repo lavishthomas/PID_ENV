@@ -100,13 +100,15 @@ class ContinuousProcess(gym.Env):
         # Changing the cv based on action
         if self.process.cv == 0:
             self.process.cv = 1.1
-        # The rate of change is depend on the compelxity of the equation 
-        increment = action[0]
-
+        # The rate of change is depend on the complexity of the equation 
+        if isinstance(action,np.ndarray):
+            action = action[0]
+            
+        increment = action
         increment = round(increment, 5)
 
         # Changing the cv based on action chose by the agent
-        self.process.cv += (action[0]/100) * self.process.cv
+        self.process.cv += (action/100) * self.process.cv
 
         # New PV is calculated by the process
         new_values = self.process.eq_evaluator(self.process.cv)

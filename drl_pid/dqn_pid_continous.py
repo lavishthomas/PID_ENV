@@ -19,7 +19,8 @@ ENV_NAME = 'drl_envs:continuous-pid-v0'
 env = gym.make(ENV_NAME)
 np.random.seed(123)
 env.seed(123)
-nb_actions = env.action_space.n
+assert len(env.action_space.shape) == 1
+nb_actions = env.action_space.shape[0]
 
 # Next, we build a very simple model.
 model = Sequential()
@@ -37,7 +38,7 @@ print(model.summary())
 
 # Finally, we configure and compile our agent. You can use every built-in Keras optimizer and
 # even the metrics!
-memory = SequentialMemory(limit=50, window_length=1)
+memory = SequentialMemory(limit=1000000, window_length=1)
 policy = BoltzmannQPolicy()
 dqn = DQNAgent(model=model, nb_actions=nb_actions, memory=memory,
                nb_steps_warmup=100, target_model_update=1e-2, policy=policy)

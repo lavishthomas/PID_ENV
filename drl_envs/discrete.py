@@ -97,6 +97,9 @@ class DiscreteProcess(gym.Env):
         print('increment : ', increment, 'change : ',
               self.process.cv_change_percent, ' : ',  self.process.cv_change_factor)
 
+        if isinstance(action,np.ndarray):
+            action = action[0]
+
         # Changing the cv based on action chose by the agent
         if action == 0:
             pass

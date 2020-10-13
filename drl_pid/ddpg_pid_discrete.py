@@ -16,8 +16,7 @@ ENV_NAME = 'drl_envs:discrete-pid-v0'
 env = gym.make(ENV_NAME)
 np.random.seed(123)
 env.seed(123)
-assert len(env.action_space.shape) == 1
-nb_actions = env.action_space.shape[0]
+nb_actions = env.action_space.n
 
 # Next, we build a very simple model.
 actor = Sequential()
