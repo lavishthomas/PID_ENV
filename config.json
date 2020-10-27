@@ -1,7 +1,7 @@
 {
     "sp": "10000",
     "degree": 1,
-    "cv": 1,
+    "cv": 100,
     "pv": 0,
     "sp_change_frequency": 1000,
     "1": [ 

@@ -12,6 +12,7 @@ from process.process import Process
 # Base url to the Process server
 baseUrl = 'http://localhost:5000/'
 
+
 class DiscreteProcess(gym.Env):
     """
     Description:
@@ -40,7 +41,7 @@ class DiscreteProcess(gym.Env):
         If the error is higher than previous step -ve reward
 
     Starting State:
-        Starting state sv 1000, pv = 0
+        Starting state sv 1000, pv = 0, gl = 0 
 
     Episode Termination:
         need to fix
@@ -67,10 +68,11 @@ class DiscreteProcess(gym.Env):
         self.current_error = 0
 
         ######################################
- 
+        self.gl= 1
         self.action_space = spaces.Discrete(5)  # 5 possible actions 0 to 4
-        high = np.array([self.process.pv, self.process.sp],  dtype=np.float32)
-        self.observation_space = spaces.Box(-high, high, dtype=np.float32)        
+        high = np.array([self.process.pv, self.process.sp, self.gl],  dtype=np.float32)
+        self.observation_space = spaces.Box(-high, high, dtype=np.float32)
+        
 
     ######################################
     # To get data via API's
@@ -91,13 +93,21 @@ class DiscreteProcess(gym.Env):
         if self.process.cv == 0:
             self.process.cv = 1.1
         # The rate of change is depend on the complexity of the equation
-        increment = (self.previous_error/self.process.sp) * self.process.cv * \
-            (self.process.cv_change_percent ** self.process.cv_change_factor)
-        increment = round(increment, 5)
-        print('increment : ', increment, 'change : ',
-              self.process.cv_change_percent, ' : ',  self.process.cv_change_factor)
+        increment = self.process.cv * \
+                    (self.previous_error/self.process.sp) * \
+                    (self.process.cv_change_percent ** \
+                    self.process.cv_change_factor)
 
-        if isinstance(action,np.ndarray):
+        increment = round(increment, 5)
+        # min_increment = self.process.cv * .01
+        # max_increment = self.process.cv * .05
+        # increment = max(increment, min_increment)
+        # increment = min(increment, max_increment)
+        print('increment : ', increment, 'change : ',
+              self.process.cv_change_percent, ' | degree: ',
+              self.process.cv_change_factor)
+
+        if isinstance(action, np.ndarray):
             action = action[0]
 
         # Changing the cv based on action chose by the agent
@@ -127,26 +137,31 @@ class DiscreteProcess(gym.Env):
         self.process.pv = new_values['pv']
 
         # Calculating error
-        self.current_error = abs(self.process.sp - self.process.pv)
+        self.current_error = self.process.sp - self.process.pv
+
+        if self.current_error > 0:
+            self.gl = 1
+        else:
+            self.gl = -1 
 
         # Reward calculator
-        if self.current_error < self.previous_error:
+        if abs(self.current_error) < self.previous_error:
             reward = 1
         else:
             reward = -1
 
         self.previous_error = self.current_error
 
-        ### Episode ends when 
-        ### the pv is almost equal to sp.
-        ### pv goes -ve 
-        ### pv goes double the sp
-        if (self.current_error < 0.01 * self.process.sp) or (self.process.pv < 0) or (self.process.pv > (2.0 * self.process.sp)):
-            done = True
-        else:
-            done = False
+        # Episode ends when
+        # the pv is almost equal to sp.
+        # pv goes -ve
+        # pv goes double the sp
+        # if (self.current_error < 0.01 * self.process.sp) or (self.process.pv < 0) or (self.process.pv > (2.0 * self.process.sp)):
+        #     done = True
+        # else:
+        #     done = False
         done = True
-        self.state = [self.process.pv, self.process.sp]
+        self.state = [self.process.pv, self.process.sp, self.gl]
 
         ######################################
         # Recording Data
@@ -165,8 +180,7 @@ class DiscreteProcess(gym.Env):
     # To get data via API's
     ######################################
     def reset(self):
-        # self.state = self.np_random.uniform(low=-0.05, high=0.05, size=(2,))
-        self.state = [0, 100]
+        self.state = [0, 100, 0]
         self.steps_beyond_done = None
         return np.array(self.state)
 

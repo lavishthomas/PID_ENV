@@ -47,7 +47,7 @@ class Process():
               'cv: ', self.cv, 'degree: ', self.degree)
 
         # The change percet
-        self.cv_change_percent = .05
+        self.cv_change_percent = .1
         # The change has to be exponential proportional to the degree to avoid the drastic change in PV while changing CV
 
         self.cv_change_factor = self.degree
