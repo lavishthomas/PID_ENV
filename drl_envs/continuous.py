@@ -27,8 +27,7 @@ class ContinuousProcess(gym.Env):
         0	pv_low                  0            Inf
         1	pv_high                 0            Inf
 
-    Actions:
-        
+    Actions:       
 
         Note: The amount the velocity that is reduced or increased is not
         fixed; it depends on the angle the pole is pointing. This is because
@@ -66,13 +65,14 @@ class ContinuousProcess(gym.Env):
         ######################################
         self.previous_error = 0
         self.current_error = 0
-
+        self.gl= 1
         ######################################
-        high = np.array([self.process.pv, self.process.sp],  dtype=np.float32)
+        
+        high = np.array([self.process.pv, self.process.sp, self.gl],  dtype=np.float32)
 
         self.action_space = spaces.Box(
             low=0,
-            high=1,
+            high=100,
             shape=(1,),
             dtype=np.float32
         )
@@ -98,7 +98,7 @@ class ContinuousProcess(gym.Env):
     ######################################
     def step(self, action):
         # Changing the cv based on action
-        if self.process.cv == 0:
+        if self.process.cv == 0 or self.process.cv < 1:
             self.process.cv = 1.1
         # The rate of change is depend on the complexity of the equation 
         if isinstance(action,np.ndarray):
@@ -108,7 +108,7 @@ class ContinuousProcess(gym.Env):
         increment = round(increment, 5)
 
         # Changing the cv based on action chose by the agent
-        self.process.cv += (action/100) * self.process.cv
+        self.process.cv += (action/10000) * self.process.cv
 
         # New PV is calculated by the process
         new_values = self.process.eq_evaluator(self.process.cv)
@@ -120,46 +120,44 @@ class ContinuousProcess(gym.Env):
         self.process.pv = new_values['pv']
 
         # Calculating error
-        self.current_error = abs(self.process.sp - self.process.pv)
+        self.current_error = self.process.sp - self.process.pv
+
+        if self.current_error > 0:
+            self.gl = 1
+        else:
+            self.gl = -1         
 
         # Reward calculator
-        if self.current_error < self.previous_error:
-            reward = 1 * self.current_error
+        if abs(self.current_error) < self.previous_error:
+            self.current_reward += 1
         else:
-            reward = -1 * self.current_error
+            self.current_reward -= 1
 
         self.previous_error = self.current_error
-
-        # Episode ends when
-        # the pv is almost equal to sp.
-        # pv goes -ve
-        # pv goes double the sp
-        if (self.current_error < 0.01 * self.process.sp) or (self.process.pv < 0) or (self.process.pv > (2.0 * self.process.sp)):
-            done = True
-        else:
-            done = False
-        done = True
-        self.state = [self.process.pv, self.process.sp]
+      
+        self.state = [self.process.pv, self.process.sp, self.gl]
 
         ######################################
         # Printing Data
         ######################################
-        print('action : ', action)  # self.action_sample[action])
+        print('\naction : ', action)  # self.action_sample[action])
         print('cv : ', self.process.cv, 'sp : ',
               self.process.sp, 'pv :', self.process.pv)
         print('ce : ', self.current_error, 'pe : ', self.previous_error)
 
         ######################################
 
-        return np.array(self.state), reward, done, {}
+        return np.array(self.state), self.current_reward, False, {}
         pass
 
     ######################################
     # To get data via API's
     ######################################
     def reset(self):
-        # self.state = self.np_random.uniform(low=-0.05, high=0.05, size=(2,))
-        self.state = [0, 100]
+        self.cv = self.process.cv
+        self.process.change_sp()
+        self.current_reward = 0
+        self.state = [self.process.pv, self.process.sp, self.gl]
         self.steps_beyond_done = None
         return np.array(self.state)
 

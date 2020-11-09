@@ -63,13 +63,14 @@ class DiscreteProcess(gym.Env):
         self.state = None
 
         self.steps_beyond_done = None
+        self.max_steps = 0
         ######################################
         self.previous_error = 0
         self.current_error = 0
-
+        self.current_reward =0
         ######################################
         self.gl= 1
-        self.action_space = spaces.Discrete(5)  # 5 possible actions 0 to 4
+        self.action_space = spaces.Discrete(4)  # 5 possible actions 0 to 4
         high = np.array([self.process.pv, self.process.sp, self.gl],  dtype=np.float32)
         self.observation_space = spaces.Box(-high, high, dtype=np.float32)
         
@@ -90,7 +91,7 @@ class DiscreteProcess(gym.Env):
     ######################################
     def step(self, action):
         # Changing the cv based on action
-        if self.process.cv == 0:
+        if self.process.cv == 0 or self.process.cv < 1:
             self.process.cv = 1.1
         # The rate of change is depend on the complexity of the equation
         increment = self.process.cv * \
@@ -111,21 +112,22 @@ class DiscreteProcess(gym.Env):
             action = action[0]
 
         # Changing the cv based on action chose by the agent
+        
         if action == 0:
-            pass
-        elif action == 1:
             self.process.cv += increment
             print('increment action')
-        elif action == 2:
+        elif action == 1:
             self.process.cv -= increment
             print('decrement action')
-        elif action == 3:
+        elif action == 2:
             self.process.cv += increment*2
             print('increment high action')
-        elif action == 4:
+        elif action == 3:
             self.process.cv -= increment*2
         else:
             print('unidentified action')
+
+        self.process.cv = round(self.process.cv, 5)
 
         # New PV is calculated by the process
         new_values = self.process.eq_evaluator(self.process.cv)
@@ -146,41 +148,35 @@ class DiscreteProcess(gym.Env):
 
         # Reward calculator
         if abs(self.current_error) < self.previous_error:
-            reward = 1
+            self.current_reward += 1
         else:
-            reward = -1
+            self.current_reward -= 1
 
         self.previous_error = self.current_error
 
-        # Episode ends when
-        # the pv is almost equal to sp.
-        # pv goes -ve
-        # pv goes double the sp
-        # if (self.current_error < 0.01 * self.process.sp) or (self.process.pv < 0) or (self.process.pv > (2.0 * self.process.sp)):
-        #     done = True
-        # else:
-        #     done = False
-        done = True
         self.state = [self.process.pv, self.process.sp, self.gl]
 
         ######################################
-        # Recording Data
+        # Printing Data
         ######################################
-        print('action : ', action)  # self.action_sample[action])
+        print('\naction : ', action)  # self.action_sample[action])
         print('cv : ', self.process.cv, 'sp : ',
               self.process.sp, 'pv :', self.process.pv)
         print('ce : ', self.current_error, 'pe : ', self.previous_error)
 
         ######################################
 
-        return np.array(self.state), reward, done, {}
+        return np.array(self.state), self.current_reward, True, {}
         pass
 
     ######################################
     # To get data via API's
     ######################################
     def reset(self):
-        self.state = [0, 100, 0]
+        self.cv = self.process.cv
+        self.process.change_sp()
+        self.current_reward = 0
+        self.state = [self.process.pv, self.process.sp, self.gl]
         self.steps_beyond_done = None
         return np.array(self.state)
 

@@ -22,7 +22,7 @@ pid = PID(.005, 1, .0005, setpoint=process.sp, sample_time=0.01)
 # assume we have a system we want to control in controlled_system
 v = process.pv
 
-for i in range(0, 2000):
+for i in range(0, 10000):
     process.cv = pid(process.pv)
     process.cv = round(process.cv, 5)
     new_values = process.eq_evaluator(process.cv)

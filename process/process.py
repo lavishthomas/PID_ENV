@@ -62,6 +62,9 @@ class Process():
             json.dump(self.polynomials, config)
         print('new sp set, value : ', sp)
 
+    def change_sp(self):
+        self.sp = int(self.polynomials['sp']) * uniform(0.5, 1.5)
+
     ######################################
     # To get value of the function at point x
     #  y = f(x)
