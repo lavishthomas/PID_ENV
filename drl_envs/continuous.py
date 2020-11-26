@@ -71,16 +71,17 @@ class ContinuousProcess(gym.Env):
         high = np.array([self.process.pv, self.process.sp, self.gl],  dtype=np.float32)
 
         self.action_space = spaces.Box(
-            low=0,
+            low=1,
             high=100,
             shape=(1,),
-            dtype=np.float32
+            dtype=np.int
         )
         self.observation_space = spaces.Box(
             low=-high,
             high=high,
             dtype=np.float32
         )        
+        self.seed()
 
     ######################################
     # To get data via API's
@@ -98,17 +99,17 @@ class ContinuousProcess(gym.Env):
     ######################################
     def step(self, action):
         # Changing the cv based on action
-        if self.process.cv == 0 or self.process.cv < 1:
+        if self.process.cv == 0 or self.process.cv < 1.1:
             self.process.cv = 1.1
         # The rate of change is depend on the complexity of the equation 
         if isinstance(action,np.ndarray):
             action = action[0]
             
-        increment = action
+        increment = action # np.clip(action, 1, 99)
         increment = round(increment, 5)
 
         # Changing the cv based on action chose by the agent
-        self.process.cv += (action/10000) * self.process.cv
+        self.process.cv = (increment)/100 * self.process.cv 
 
         # New PV is calculated by the process
         new_values = self.process.eq_evaluator(self.process.cv)
@@ -129,9 +130,9 @@ class ContinuousProcess(gym.Env):
 
         # Reward calculator
         if abs(self.current_error) < self.previous_error:
-            self.current_reward += 1
+            self.current_reward = 1
         else:
-            self.current_reward -= 1
+            self.current_reward = -1
 
         self.previous_error = self.current_error
       
@@ -140,23 +141,20 @@ class ContinuousProcess(gym.Env):
         ######################################
         # Printing Data
         ######################################
-        print('\naction : ', action)  # self.action_sample[action])
+        print('\naction : ', increment)  # self.action_sample[action])
         print('cv : ', self.process.cv, 'sp : ',
               self.process.sp, 'pv :', self.process.pv)
         print('ce : ', self.current_error, 'pe : ', self.previous_error)
 
         ######################################
 
-        return np.array(self.state), self.current_reward, False, {}
+        return np.array(self.state), self.current_reward, True, {}
         pass
 
     ######################################
     # To get data via API's
     ######################################
     def reset(self):
-        self.cv = self.process.cv
-        self.process.change_sp()
-        self.current_reward = 0
         self.state = [self.process.pv, self.process.sp, self.gl]
         self.steps_beyond_done = None
         return np.array(self.state)
