@@ -105,11 +105,11 @@ class ContinuousProcess(gym.Env):
         if isinstance(action,np.ndarray):
             action = action[0]
             
-        increment = action # np.clip(action, 1, 99)
-        increment = round(increment, 5)
+        increment = np.clip(action, 1, 99)
+        increment = round(increment, 0)
 
         # Changing the cv based on action chose by the agent
-        self.process.cv = (increment)/100 * self.process.cv 
+        self.process.cv = (1 + (increment)/100 ) * self.process.cv 
 
         # New PV is calculated by the process
         new_values = self.process.eq_evaluator(self.process.cv)
